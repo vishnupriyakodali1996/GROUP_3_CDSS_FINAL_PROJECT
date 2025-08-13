@@ -1,6 +1,6 @@
 {
   "resourceType": "Observation",
-  "id": "fev1-measurement-48651906",
+  "id": "fev1-measurement-48697711",
   "meta": {
     "profile": [
       "http://hl7.org/fhir/StructureDefinition/Observation"
@@ -28,11 +28,11 @@
     ]
   },
   "subject": {
-    "reference": "Patient/48651906"
+    "reference": "Patient/48697711"
   },
-  "effectiveDateTime": "2025-08-12T16:18:57Z",
+  "effectiveDateTime": "2025-08-13T13:52:13Z",
   "valueQuantity": {
-    "value": 70,
+    "value": 75,
     "unit": "%",
     "system": "http://unitsofmeasure.org",
     "code": "%"

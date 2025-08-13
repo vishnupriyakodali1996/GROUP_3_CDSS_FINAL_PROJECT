@@ -1,0 +1,40 @@
+{
+  "resourceType": "Observation",
+  "id": "fev1-measurement-48698986",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/Observation"
+    ]
+  },
+  "status": "final",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code": "finding",
+          "display": "Finding"
+        }
+      ]
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "170632009",
+        "display": "Asthma causing night waking"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/48698986"
+  },
+  "effectiveDateTime": "2025-08-13T15:04:24Z",
+  "valueQuantity": {
+    "value": 4,
+    "unit": "wk",
+    "system": "http://unitsofmeasure.org",
+    "code": "wk"
+  }
+}
