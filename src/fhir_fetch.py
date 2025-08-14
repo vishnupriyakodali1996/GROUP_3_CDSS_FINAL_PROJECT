@@ -21,13 +21,6 @@ cwd = Path(os.getcwd())
 data_dir = cwd / "data"
 data_dir.mkdir(exist_ok=True)
 
-''' To check for last updated patients eligible (should have asthma, should not be on asthma meication and age should be
- >4 patients and store their id'''
-
-
-'''For patients not on long-term medication, check if required measurements exist for decision support; if missing, send 
-a reminder, take user input, and create the observation.'''
-
 def rule_1():
     file_path = data_dir / "patient_list.txt"
     patient_list = []
@@ -37,40 +30,54 @@ def rule_1():
             if patient_id:
                 patient_list.append(patient_id)
 
-# Checking if the patient has fev1 observation, reminder, create
-    obs_status = check_obs(patient_list)
+# Checking if the patient has fev1 observation
+# If there is no fev1 percentage record for the patient reminder to enter value
+# spirometer not available then can ignore this
+# If fev1 value is entered then post observation
+    fev1_status = check_obs(patient_list)
     for patient_id in patient_list:
-        if obs_status.get(patient_id, False) == False:
+        if fev1_status.get(patient_id, False) == False:
             while True:
-                try:
-                    fev1_value = int(input(f"Reminder for patient {patient_id} (FEV1 predicted percentage):\nEnter FEV1 predicted percentage from following values (integer only): "))
-                    if fev1_value < 0 or fev1_value > 200:
-                        print("Please enter a realistic FEV1 percentage value (0-200).")
-                        continue
+                choice = input(
+                    f"Reminder for patient {patient_id} (FEV1 predicted percentage):\n"
+                    "Enter numerical value above 0 for FEV1 percentage or type 'ignore' to skip: "
+                ).strip().lower()
+
+                if choice == "ignore":
+                    print(
+                        f"Clinician chose to skip FEV1 entry for patient {patient_id}. Proceeding to nighttime awakening evaluation."
+                    )
                     break
+
+                try:
+                    fev1_value = int(choice)
+                    if fev1_value < 0:
+                        print("Please enter a realistic FEV1 percentage value.")
+                        continue
+
+                    obs_file = save_observation_json(patient_id, fev1_value)
+                    valid = validate_resource(obs_file)
+                    if valid:
+                        with open(obs_file, "r") as f:
+                            observation = json.load(f)
+                        post_observation_to_hapi(observation)
+                        fev1_status[patient_id] = True
+                    else:
+                        print(f"Observation for patient {patient_id} failed validation and was not posted.")
+
                 except ValueError:
-                    print("Invalid input, please enter an integer.")
-            print(f"You entered: {fev1_value}")
-            obs_file = save_observation_json(patient_id, fev1_value)
-            valid = validate_resource(obs_file)
-            if valid:
-                with open(obs_file, "r") as f:
-                    observation = json.load(f)
-                post_observation_to_hapi(observation)
-            else:
-                print(f"Observation for patient {patient_id} failed validation and was not posted.")
+                    print("Invalid input.")
 
-
-    obs_status = check_obs_na(patient_list)
+# checking for the finding night waking frequency due to asthma
+    night_awake_status = check_obs_na(patient_list)
     # Mapping the units
     ucum_map = {
         "week": "wk",
         "month": "mo"
     }
-
-# Check night waking frequency; if missing, prompt and create observation.
+# If observation is missing send the reminder to enter the details
     for patient_id in patient_list:
-        if obs_status.get(patient_id, False) == False:
+        if night_awake_status.get(patient_id, False) == False:
             while True:
                 try:
                     frequency = int(input(
@@ -91,39 +98,108 @@ def rule_1():
                     if valid:
                         with open(obs_file, "r") as f:
                             observation = json.load(f)
-                        post_observation_to_hapi(observation) # If validated posting then to HAPI fhir
+                        post_observation_to_hapi(observation)# If validated posting then to HAPI fhir
+                        night_awake_status[patient_id] = True
                     else:
                         print(f"Observation for patient {patient_id} failed validation and was not posted.")
 
                     break
 
                 except ValueError:
-                    print("Invalid input. Please enter a number for frequency.")
+                    print("Invalid input.")
     patient_data = fetch_patient_data(patient_list)
     print(patient_data)
 
     # Treatment recommendation rules
-    for patient_sets in patient_data:
+    for patient_sets in fetch_patient_data(patient_list):
         pid = patient_sets.get('patient_id')
         age = patient_sets.get('age')
         fev1_value = patient_sets.get('fev1_value')
+        night_awake_value= patient_sets.get('night_awake_value')
+        night_awake_unit = patient_sets.get('night_awake_unit')
         # Decision modelled from high to low severity (Recommendation for worst case scenario)
-        if age >= 12 and fev1_value < 60:
-            print(f"{pid}: Medication recommendation: Step 4 or 5")
-        elif age in range(5, 12) and fev1_value < 60:
-            print(f"{pid}: Medication recommendation: Step 3 or 4")
-        elif age >= 12 and fev1_value in range(60, 81):
-            print(f"{pid}: Medication recommendation: Step 3")
-        elif age in range(5, 12) and fev1_value in range(60, 81):
-            print(f"{pid}: Medication recommendation: Step 3 (Medium dose ICS option)")
-        elif age >= 12 and fev1_value > 80:
-            print(f"{pid}: Medication recommendation: Step 2")
-        elif age in range(5, 12) and fev1_value > 80:
-            print(f"{pid}: Medication recommendation: Step 2")
+        # Initial severity recommendation based on rules
+        if night_awake_unit == 'wk':
+            if age >= 12 and (fev1_value < 60 or night_awake_value >= 7):
+                severity = "Persistent severe"
+                medication = "Step 4 or 5"
+            elif age in range(5, 12) and (fev1_value < 60 or night_awake_value >= 7):
+                severity = "Persistent severe"
+                medication = "Step 3 or 4"
+            elif age >= 12 and (fev1_value in range(60, 81) or night_awake_value in range(1, 7)):
+                severity = "Persistent moderate"
+                medication = "Step 3"
+            elif age in range(5, 12) and (fev1_value in range(60, 81) or night_awake_value in range(1, 7)):
+                severity = "Persistent moderate"
+                medication = "Step 3 (Medium dose ICS option)"
+        elif night_awake_unit == 'mo':
+            if age >= 12 and (fev1_value > 80 or night_awake_value in range(3, 5)):
+                severity = "Persistent mild"
+                medication = "Step 2"
+            elif age in range(5, 12) and (fev1_value > 80 or night_awake_value in range(3, 5)):
+                severity = "Persistent mild"
+                medication = "Step 2"
+            elif age >= 5 and (fev1_value > 80 or night_awake_value <= 2):
+                severity = "Intermittent"
+                medication = "Step 1"
+
+        # Show initial recommendation
+        print(f"\nPatient {pid} initial severity recommendation: {severity}")
+        print(f"Medication recommendation: {medication}")
+
+        # Clinician override
+        while True:
+            override = input(
+                "Do you want to change the severity based on clinical assessment? (yes/no): ").strip().lower()
+            if override == "yes":
+                # If yes, ask for severity selection
+                print("Select new severity level:")
+                print("1) Intermittent\n2) Persistent mild\n3) Persistent moderate\n4) Persistent severe")
+                while True:
+                    try:
+                        choice = int(input("Enter the number corresponding to severity: "))
+                        severity_options = {1: "Intermittent", 2: "Persistent mild",
+                                            3: "Persistent moderate", 4: "Persistent severe"}
+                        if choice in severity_options:
+                            severity = severity_options[choice]
+                            # Recalculate medication recommendation based on updated severity and age
+                            if severity == "Intermittent":
+                                medication = "Step 1"
+                            elif severity == "Persistent mild":
+                                medication = "Step 2"
+                            elif severity == "Persistent moderate":
+                                medication = "Step 3" if age >= 12 else "Step 3 (Medium dose ICS option)"
+                            elif severity == "Persistent severe":
+                                medication = "Step 4 or 5" if age >= 12 else "Step 3 or 4"
+
+                            print(f"Updated severity for patient {pid}: {severity}")
+                            print(f"Updated medication recommendation: {medication}")
+                            break  # exit severity selection
+                        else:
+                            print("Please enter a valid number (1-4).")
+                    except ValueError:
+                        print("Invalid input. Enter a number from 1 to 4.")
+                break  # exit override loop after handling yes
+            elif override == "no":
+                break  # exit override loop if no change
+            else:
+                print("Invalid input. Please enter 'yes' or 'no'.")
 
 
 if __name__ == '__main__':
-    eligibility_condition() # run this to fetch the last patient resource who is diagnosed with asthma
-    rule_1() # Decision rules
+    eligibility_condition()  # creates patient_list.txt for eligible patients
+    # Getting patient ID's form eligible patients_list
+    file_path = data_dir / "patient_list.txt"
+    patient_list = []
+    if file_path.exists():
+        with open(file_path, "r") as f:
+            for line in f:
+                pid = line.strip()
+                if pid:
+                    patient_list.append(pid)
+
+    # Only run rule_1 if there are eligible patients (ensure CDSS triggers only if there are eligible patients)
+    if patient_list:
+        rule_1()
 
 

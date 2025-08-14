@@ -79,13 +79,21 @@ def eligibility_condition():
         response = requests.get(url)
         patient_data = response.json()
 
-        birth_date = datetime.strptime(patient_data['birthDate'], "%Y-%m-%d")
-        today = datetime.today()
-        age = today.year - birth_date.year
-        if (today.month, today.day) < (birth_date.month, birth_date.day):
-            age -= 1
+        birth_date_str = patient_data.get('birthDate')
+        if not birth_date_str:
+            print(f"Patient {patient_id} has no birthDate")
+            continue  # skip this patient if no birthdate is present
 
+        try:
+            birth_date = datetime.strptime(birth_date_str, "%Y-%m-%d")
+        except ValueError:
+            print(f"Patient {patient_id} has invalid birthDate format: {birth_date_str}. Skipping.")
+            continue
+
+        today = datetime.today()
+        age = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
         print(f"Patient {patient_id} age: {age}")
+
         if age > 4:
             eligible_patients.append(patient_id)
 
@@ -97,9 +105,6 @@ def eligibility_condition():
     print(f"Eligible patient IDs saved to {file_path}")
 
     return eligible_patients
-
-
-
 
 
 

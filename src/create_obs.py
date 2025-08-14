@@ -62,8 +62,8 @@ def save_observation_json_2(patient_id, frequency, unit_code):
         "category": [{
             "coding": [{
                 "system": "http://terminology.hl7.org/CodeSystem/observation-category",
-                "code": "finding",
-                "display": "Finding"
+                "code": "exam",
+                "display": "Exam"
             }]
         }],
         "code": {
