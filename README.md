@@ -48,7 +48,7 @@ decision logic output will have the CDSS reminder and will take the user input f
 and the frequency of nighttime awakening. 
 ### create_obs.py:
 * Has functions to create the observations with the user input for FEV! percentage and nighttime awakening frequency due 
-to asthma modelled referring to [^2], [^3], [^4], [^5], [^6], [^7].
+to asthma modelled referring to FHIR specification, SNOMED international browser [^2], [^3], [^4], [^5], [^6], [^7].
 ### validate.py
 * Has functions to validate the observation created
 ### post_obs.py
