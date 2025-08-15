@@ -1,4 +1,4 @@
-# CDSS for severity assessment and medication recommendation for ASTHMA
+# A Guideline-Based CDSS for Classifying Asthma Severity and Initial Therapy Recommendation
 ## Introduction:
 This script implements a Clinical Decision Support System (CDSS) designed to provide severity grading and initial therapy 
 recommendations for asthma patients who are not currently on long-term asthma medication and are over 4 years of age. 
@@ -12,7 +12,7 @@ These include nighttime awakening frequency due to asthma and FEV1 predicted per
 
 User input is also taken into consideration when generating recommendations. The primary decision-making logic is 
 implemented in the cdss_decision_logic.py file. The required patient data is obtained public FHIR server (HAPI server)
-using http methods and then substituted in teh logic. Additionally, user input was taken where required.
+using http methods and then substituted in the logic [^2]. Additionally, user input was taken where required.
 
 ## Steps to implement the cdss:
 ### System Requirements
