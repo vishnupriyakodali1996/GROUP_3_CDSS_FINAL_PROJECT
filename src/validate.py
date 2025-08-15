@@ -5,8 +5,7 @@ import json
 from pprint import pprint
 from datetime import datetime
 
-BASE_URL = "https://hapi.fhir.org/baseR4"
-hapi_url = BASE_URL
+hapi_url = "https://hapi.fhir.org/baseR4"
 
 cwd = Path(os.getcwd())
 data_dir = cwd / "data"

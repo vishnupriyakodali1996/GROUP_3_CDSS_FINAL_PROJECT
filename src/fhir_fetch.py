@@ -21,6 +21,8 @@ cwd = Path(os.getcwd())
 data_dir = cwd / "data"
 data_dir.mkdir(exist_ok=True)
 
+
+
 def rule_1():
     file_path = data_dir / "patient_list.txt"
     patient_list = []
