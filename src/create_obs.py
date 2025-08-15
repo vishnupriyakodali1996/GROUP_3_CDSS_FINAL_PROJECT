@@ -54,7 +54,7 @@ def save_observation_json(patient_id, fev1_value):
 def save_observation_json_2(patient_id, frequency, unit_code):
     observation = {
         "resourceType": "Observation",
-        "id": f"asthma causing night waking-{patient_id}",
+        "id": f"asthma-causing-night-waking-{patient_id}",
         "meta": {
             "profile": ["http://hl7.org/fhir/StructureDefinition/Observation"]
         },
