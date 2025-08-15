@@ -2,8 +2,8 @@
 ## Introduction:
 This script implements a Clinical Decision Support System (CDSS) designed to provide severity grading and initial therapy 
 recommendations for asthma patients who are not currently on long-term asthma medication and are over 4 years of age. 
-The recommendations are based on clinical guidelines published by the National Heart, Lung, and Blood Institute [^1], 
-as reported by the National Asthma Education and Prevention Program Coordinating Committee Expert Panel Working Group [^1].
+The recommendations are based on clinical guidelines published by the National Heart, Lung, and Blood Institute, 
+as reported by the National Asthma Education and Prevention Program Coordinating Committee Expert Panel Working Group [^1],[^8].
 
 The guidelines list multiple factors for assessing asthma severity and guiding treatment, including symptoms, asthma 
 exacerbations requiring oral systemic corticosteroids, and interference with normal activity. For this implementation, 
@@ -35,7 +35,7 @@ decision logic output will have the CDSS reminder and will take the user input f
 
 ## Files Description:
 ### data/ directory: Contains JSON templates:
-* observation_template.json — sample observation template copied from HAPI FHIR [^7].
+* observation_template.json - sample observation template copied from FHIR website [^7].
 ### patient_list.txt: 
 * Holds the IDs of eligible patients.
 ### eligibility.py:
@@ -59,12 +59,12 @@ to asthma modelled referring to FHIR specification, SNOMED international browser
 ### cdss_decision_logic.py:
 * Imports all the required functions and libraries other python files runs them sequentially rule_1() which has the 
 decision logic and recommendations.
+### medication.py:
+* Has function with medication mappings for age and severity
 
 ## References:
-[^1]: National Asthma Education and Prevention Program Coordinating Committee Expert Panel Working Group. (2020, December). 
-_2020 focused updates to the asthma management guidelines: A report from the National Asthma Education and Prevention Program 
-Coordinating Committee Expert Panel Working Group_. National Heart, Lung, and Blood Institute, National Institutes of 
-Health. https://www.nhlbi.nih.gov/sites/default/files/publications/AsthmaManagementGuidelinesReport-2-4-21.pdf
+[^1]: National Heart, Lung, and Blood Institute. (2012). _Asthma care quick reference: Diagnosing and managing asthma. 
+National Institutes of Health_. https://www.nhlbi.nih.gov/sites/default/files/publications/12-5075.pdf
 [^2]: HAPI FHIR. (n.d.). _HAPI FHIR Test/Demo Server R4 Endpoint_. Retrieved August 15, 2025, 
 from https://hapi.fhir.org/baseR4/swagger-ui/
 [^3]: Health Level Seven International. (n.d.). _Observation - FHIR v6.0.0-ballot2_. Retrieved August 15, 2025, 
@@ -77,3 +77,5 @@ August 15, 2025, from https://build.fhir.org/valueset-observation-category.html
 Retrieved August 15, 2025, from https://browser.ihtsdotools.org/?perspective=full&conceptId1=404684003&edition=MAIN/2025-08-01&release=&languages=en
 [^7]: Health Level Seven International. (n.d.). _Observation/example.json - FHIR v6.0.0-ballot2_. Retrieved 
 August 15, 2025, from https://build.fhir.org/observation-example.json.html
+[^8]: National Heart, Lung, and Blood Institute. (2007). _Expert Panel Report 3: Guidelines for the diagnosis and 
+management of asthma - Full report 2007_. National Institutes of Health. https://www.nhlbi.nih.gov/sites/default/files/media/docs/EPR-3_Asthma_Full_Report_2007.pdf

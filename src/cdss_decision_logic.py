@@ -6,6 +6,7 @@ from pprint import pprint
 from datetime import datetime
 
 # Importing all the functions needed
+from medication import get_medication
 from check_obs import check_obs
 from check_obs import check_obs_na
 from create_obs import save_observation_json
@@ -124,26 +125,25 @@ def rule_1():
         if night_awake_unit == 'wk':
             if age >= 12 and (fev1_value < 60 or night_awake_value >= 7):
                 severity = "Persistent severe"
-                medication = "Step 4 or 5"
             elif age in range(5, 12) and (fev1_value < 60 or night_awake_value >= 7):
                 severity = "Persistent severe"
-                medication = "Step 3 or 4"
             elif age >= 12 and (fev1_value in range(60, 81) or night_awake_value in range(1, 7)):
                 severity = "Persistent moderate"
-                medication = "Step 3"
             elif age in range(5, 12) and (fev1_value in range(60, 81) or night_awake_value in range(1, 7)):
                 severity = "Persistent moderate"
-                medication = "Step 3 (Medium dose ICS option)"
         elif night_awake_unit == 'mo':
             if age >= 12 and (fev1_value > 80 or night_awake_value in range(3, 5)):
                 severity = "Persistent mild"
-                medication = "Step 2"
             elif age in range(5, 12) and (fev1_value > 80 or night_awake_value in range(3, 5)):
                 severity = "Persistent mild"
-                medication = "Step 2"
             elif age >= 5 and (fev1_value > 80 or night_awake_value <= 2):
                 severity = "Intermittent"
-                medication = "Step 1"
+
+        # Show initial recommendation
+        print(f"\nPatient {pid} initial severity recommendation: {severity}")
+
+        # Assign medication for initial severity
+        medication = get_medication(severity, age)
 
         # Show initial recommendation
         print(f"\nPatient {pid} initial severity recommendation: {severity}")
@@ -151,10 +151,9 @@ def rule_1():
 
         # Clinician override
         while True:
-            override = input(
+            override = input("----------------------------------------------------\n"
                 "Do you want to change the severity based on clinical assessment? (yes/no): ").strip().lower()
             if override == "yes":
-                # If yes, ask for severity selection
                 print("Select new severity level:")
                 print("1) Intermittent\n2) Persistent mild\n3) Persistent moderate\n4) Persistent severe")
                 while True:
@@ -164,33 +163,27 @@ def rule_1():
                                             3: "Persistent moderate", 4: "Persistent severe"}
                         if choice in severity_options:
                             severity = severity_options[choice]
-                            # Recalculate medication recommendation based on updated severity and age
-                            if severity == "Intermittent":
-                                medication = "Step 1"
-                            elif severity == "Persistent mild":
-                                medication = "Step 2"
-                            elif severity == "Persistent moderate":
-                                medication = "Step 3" if age >= 12 else "Step 3 (Medium dose ICS option)"
-                            elif severity == "Persistent severe":
-                                medication = "Step 4 or 5" if age >= 12 else "Step 3 or 4"
-
-                            print(f"Updated severity for patient {pid}: {severity}")
-                            print(f"Updated medication recommendation: {medication}")
-                            break  # exit severity selection
+                            medication = get_medication(severity, age)  # recalc medication
+                            break
                         else:
                             print("Please enter a valid number (1-4).")
                     except ValueError:
                         print("Invalid input. Enter a number from 1 to 4.")
-                break  # exit override loop after handling yes
+                break
             elif override == "no":
-                break  # exit override loop if no change
+                # Keep initial severity and medication
+                break
             else:
                 print("Invalid input. Please enter 'yes' or 'no'.")
 
+        # Print the final recommendation
+        print(f"Final severity recommendation for patient {pid}: {severity}")
+        print(f"Medication recommendation: {medication}")
 
 if __name__ == '__main__':
     eligibility_condition()  # creates patient_list.txt for eligible patients
-    # Getting patient ID's form eligible patients_list
+
+    # Getting patient IDs from eligible patient list
     file_path = data_dir / "patient_list.txt"
     patient_list = []
     if file_path.exists():
@@ -200,7 +193,7 @@ if __name__ == '__main__':
                 if pid:
                     patient_list.append(pid)
 
-    # Only run rule_1 if there are eligible patients (ensure CDSS triggers only if there are eligible patients)
+    # Run rule_1 if there are eligible patients
     if patient_list:
         rule_1()
 
