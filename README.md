@@ -6,9 +6,9 @@ The recommendations are based on clinical guidelines published by the National H
 as reported by the National Asthma Education and Prevention Program Coordinating Committee Expert Panel Working Group [^1],[^8].
 
 The guidelines list multiple factors for assessing asthma severity and guiding treatment, including symptoms, asthma 
-exacerbations requiring oral systemic corticosteroids, and interference with normal activity. For this implementation, 
+exacerbations requiring oral systemic corticosteroids, and interference with normal activity [^1],[^8]. For this implementation, 
 parameters with corresponding SNOMED codes and those that can be incorporated into declarative logic were selected. 
-These include nighttime awakening frequency due to asthma and FEV1 predicted percentage.
+These include nighttime awakening frequency due to asthma and FEV1 predicted percentage[^1],[^8].
 
 User input is also taken into consideration when generating recommendations. The primary decision-making logic is 
 implemented in the cdss_decision_logic.py file. The required patient data is obtained public FHIR server (HAPI server)
