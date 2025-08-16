@@ -63,8 +63,8 @@ decision logic and recommendations.
 * Has function with medication mappings for age and severity
 
 ## References:
-[^1]: National Heart, Lung, and Blood Institute. (2012). _Asthma care quick reference: Diagnosing and managing asthma. 
-National Institutes of Health_. https://www.nhlbi.nih.gov/sites/default/files/publications/12-5075.pdf
+[^1]: National Heart, Lung, and Blood Institute. (2012). _Asthma care quick reference: Diagnosing and managing asthma_. 
+National Institutes of Health. https://www.nhlbi.nih.gov/sites/default/files/publications/12-5075.pdf
 [^2]: HAPI FHIR. (n.d.). _HAPI FHIR Test/Demo Server R4 Endpoint_. Retrieved August 15, 2025, 
 from https://hapi.fhir.org/baseR4/swagger-ui/
 [^3]: Health Level Seven International. (n.d.). _Observation - FHIR v6.0.0-ballot2_. Retrieved August 15, 2025, 
